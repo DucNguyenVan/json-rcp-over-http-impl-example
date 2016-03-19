@@ -10,5 +10,18 @@ class MyHandler
   end
 end
 
-server = Jimson::Server.new(MyHandler.new, server: 'unicorn')
-server.start # serve with webrick on http://0.0.0.0:8999/
+
+# Build app
+app = Rack::Builder.new  do
+  use Rack::Reloader,10
+  use Rack::Runtime
+  run Jimson::Server.new(MyHandler.new, server: 'unicorn')
+end
+
+# Start server
+opts = {server: 'unicorn'}
+Rack::Server.start(opts.merge(
+  app: app,
+  Host: '0.0.0.0',
+  Port: '8999',
+))
